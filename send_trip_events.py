@@ -33,3 +33,4 @@ except Exception as e:
     print("❌ Failed to send messages:", str(e))
 finally:
     producer.close()
+
