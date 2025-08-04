@@ -70,3 +70,31 @@ def analyze_trip(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as ex:
         logging.error(f"Processing error: {ex}")
         return func.HttpResponse(f"Failed: {str(ex)}", status_code=400)
+``` 
+##  Logic App Highlights
+
+The Logic App (`trip-monitor-logic`) orchestrates the real-time event flow between Event Hub, Azure Function, and Microsoft Teams. Here's how it works:
+
+- **Trigger:** Activates when new trip data is available in **Event Hub** (batch mode, every 1 minute).
+- **Parsing:** Uses a **Compose** and **Parse JSON** action to extract event details.
+- **Function Invocation:** Sends parsed trip data to the **analyze_trip** Azure Function via HTTP POST.
+- **Condition Handling:** Iterates through the results and:
+  - Sends ** Suspicious Vendor Activity** card if `insights` contains `"SuspiciousVendorActivity"`
+  - Sends ** Interesting Trip Detected** card if other flags exist
+  - Sends ** Trip Analyzed – No Issues** card if no insights are found
+- **Notification:** Adaptive Cards are delivered to Microsoft Teams using a **Webhook Connector** tied to a specific channel.
+
+---
+
+##  Example Event Input
+
+```json
+{
+  "ContentData": {
+    "vendorID": "V003",
+    "tripDistance": "0.4",
+    "passengerCount": "1",
+    "paymentType": "2"
+  }
+}
+```
