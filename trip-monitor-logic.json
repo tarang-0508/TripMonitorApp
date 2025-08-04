@@ -1,0 +1,47 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2019-05-01/workflowdefinition.json#",
+    "actions": {
+      "Call_ProcessTripEvent_Function": {
+        "type": "Http",
+        "inputs": {
+          "method": "POST",
+          "uri": "https://trip-event-processor-func-f0c9bhbpgkepd6fb.canadacentral-01.azurewebsites.net/api/ProcessTripEvent?code=dOY8r9JZ4uIqHPhZO2BCoT8OTMSr1c6bG9HP2AfsKjnbAzFuctm-zg==",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": "@triggerBody()"
+        },
+        "runAfter": {}
+      }
+    },
+    "triggers": {
+      "When_event_received_in_EventHub": {
+        "type": "Http",
+        "kind": "EventHubTrigger",
+        "inputs": {
+          "eventHubName": "trip-events",
+          "eventHubNamespace": "tripomnamespace",
+          "eventHubConnection": "@parameters('$connections')['azureeventhub']['connectionId']",
+          "eventHubConsumerGroup": "$Default"
+        },
+        "recurrence": {
+          "frequency": "Minute",
+          "interval": 1
+        }
+      }
+    },
+    "outputs": {}
+  },
+  "parameters": {
+    "$connections": {
+      "value": {
+        "azureeventhub": {
+          "connectionId": "/subscriptions/88a7e5fc-accd-4a41-b20c-17272530b307/resourceGroups/TripMonitoringRG/providers/Microsoft.Web/connections/azureeventhub",
+          "connectionName": "azureeventhub",
+          "id": "/subscriptions/88a7e5fc-accd-4a41-b20c-17272530b307/providers/Microsoft.Web/locations/canadacentral/managedApis/azureeventhub"
+        }
+      }
+    }
+  }
+}
